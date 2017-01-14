@@ -4,11 +4,13 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/TraditionalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-10 05:40:08
-// Modified: 2017-01-14 02:23:36
+// Modified: 2017-01-14 22:06:11
 
 #ifndef TRADITIONALGA_H
 #define TRADITIONALGA_H
 
+#include <algorithm>
+#include <list>
 #include <vector>
 #include "NotImplemented.hpp"
 #include "random.hpp"
@@ -20,7 +22,7 @@ namespace ga {
 // IndividualType should implement:
 //     - static void generateRandomPopulation(unsigned int p_size,
 //                                            std::vector<Candidate>& p)
-//     - virtual unsigned int computeFitness(IndividualType const& const)
+//     - virtual unsigned int compute_fitness(IndividualType const& const)
 template <typename IndividualType>
 class TraditionalGA
 {
@@ -28,7 +30,7 @@ class TraditionalGA
         struct Candidate
         {
             IndividualType  individual;
-            unsigned int             fitness;
+            unsigned int    fitness;
         };
 
     protected:  // TraditionalGA cannot be instanciated without being inherited
@@ -57,7 +59,7 @@ class TraditionalGA
 
                 // compute fitness of individuals
                 for (Candidate& c: _population) {
-                    c.fitness = computeFitness(c.individual);
+                    c.fitness = compute_fitness(c.individual);
                 }
             }
         }
@@ -65,34 +67,50 @@ class TraditionalGA
     protected:
         // TODO array of iterators for selected ?
         virtual void
-        selection()
+        selection(std::vector<Candidate*>& selected_candidates)
         {
-            std::vector<Candidate const*>      candidates(_population);
+            std::list<Candidate*>   candidates(_population.size());
+            // std::list because deletion is more efficient
 
-            for (Candidate const& c: _population)
+            if (_population.empty())
+                return ; // TODO throw exception ?
+
+            for (Candidate& c: _population)
                 candidates.push_back(&c);
 
-            for (unsigned int i = 0; i < _nb_selected; ++i) {
-                std::vector<unsigned int>   intervals(candidates.size());
-                unsigned int                tmp = 0;
+            for (unsigned int i = 0;
+                 i < _nb_selected && !candidates.empty();
+                 ++i) {
 
-                // init intervals
-                for (Candidate const& c: _population) {
-                    tmp += c.fitness;
-                    intervals.push_back(tmp);
-                }
+                unsigned int total_fitnesses = std::accumulate(
+                        candidates.begin(), candidates.end(), 0,
+                        [](unsigned int sum, Candidate const* c)
+                        { return sum += c->fitness; }
+                    );
+                unsigned int random_value =
+                    utils::generateIntegerNumber<unsigned int>(
+                        0, total_fitnesses
+                    );
+                unsigned int tmp = 0;
+                auto selected = std::find_if(
+                    candidates.begin(), candidates.end(),
+                    [&tmp, random_value](Candidate* c)
+                    {
+                        tmp += c->fitness;
+                        return random_value <= tmp;
+                    }
+                );
 
-                // TODO use generate for interval and found selected with find first blabal
-                utils::GenerateIntegerNumber(0, intervals.last());
-                // TODO remove selected form candidates and push to selected candidates container
+                selected_candidates.push_back(*selected);
+                candidates.erase(selected);
             }
         }
 
         // functions to implement when inherited
         virtual unsigned int
-        computeFitness(IndividualType const&) const
+        compute_fitness(IndividualType const&) const
         {
-            throw exceptions::NotImplemented("computeFitness()");
+            throw exceptions::NotImplemented("compute_fitness()");
         }
 
     protected:
