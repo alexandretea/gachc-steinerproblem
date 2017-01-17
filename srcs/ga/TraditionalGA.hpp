@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/TraditionalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-10 05:40:08
-// Modified: 2017-01-17 14:27:01
+// Modified: 2017-01-17 15:00:15
 
 #ifndef TRADITIONALGA_H
 #define TRADITIONALGA_H
@@ -116,14 +116,22 @@ class TraditionalGA
             for (Candidate const* const& c: selection) {
                 IndividualType const& i = c->individual;
 
-                new_generation.emplace_back(
-                    (i.*_reproduction_op)(i) // TODO fix parameter
-                );
+                if (utils::generateIntegerNumber<unsigned int>(0, 100) <
+                        _reproduction_prob) {
+
+                    new_generation.emplace_back(
+                        (i.*_reproduction_op)(i) // TODO fix parameter
+                    );
+                }
             }
 
             // mutation
             for (IndividualType& individual: new_generation) {
-                (individual.*_mutation_op)();
+                if (utils::generateIntegerNumber<unsigned int>(0, 100) <
+                        _mutation_prob) {
+
+                    (individual.*_mutation_op)();
+                }
             }
         }
 
@@ -137,6 +145,10 @@ class TraditionalGA
         unsigned int                    _no_generation;
         MutationOperator                _mutation_op;
         ReproductionOperator            _reproduction_op;
+
+        // probabilities as a percentage (ex: 70 for 70% of success)
+        unsigned int                    _mutation_prob;
+        unsigned int                    _reproduction_prob;
 };
 
 } // end namespace ga

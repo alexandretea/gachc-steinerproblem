@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/utils/random.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-14 01:36:25
-// Modified: 2017-01-14 02:09:42
+// Modified: 2017-01-17 14:57:47
 
 #ifndef RANDOM_H
 #define RANDOM_H
@@ -19,9 +19,9 @@ template <typename NumberType,
 NumberType
 generateNumber(NumberType min, NumberType max)
 {
-    std::random_device  rd;
-    Generator           mt(rd());
-    Distribution        dist(min, max);
+    static std::random_device  rd;
+    static Generator           mt(rd());
+    static Distribution        dist(min, max);
 
     return dist(mt);
 }
