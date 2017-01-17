@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/TraditionalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-10 05:40:08
-// Modified: 2017-01-17 15:00:15
+// Modified: 2017-01-17 15:50:08
 
 #ifndef TRADITIONALGA_H
 #define TRADITIONALGA_H
@@ -109,28 +109,36 @@ class TraditionalGA
         }
 
         virtual void
-        create_new_generation(std::vector<IndividualType>& new_generation,
+        create_new_generation(std::vector<Candidate>& new_generation,
                 std::vector<Candidate const*> const& selection) const
         {
             // reproduction
-            for (Candidate const* const& c: selection) {
-                IndividualType const& i = c->individual;
+            for (auto f = selection.begin(), m = std::next(f);
+                 f != selection.end() && m != selection.end();
+                 ++f, ++m) {
+
+                IndividualType const& father = (*f)->individual;
+                IndividualType const& mother = (*m)->individual;
 
                 if (utils::generateIntegerNumber<unsigned int>(0, 100) <
                         _reproduction_prob) {
 
-                    new_generation.emplace_back(
-                        (i.*_reproduction_op)(i) // TODO fix parameter
+                    // reproduce and make two children
+                    new_generation.push_back(
+                        { (father.*_reproduction_op)(mother), 0 }
+                    );
+                    new_generation.push_back(
+                        { (mother.*_reproduction_op)(father), 0 }
                     );
                 }
             }
 
             // mutation
-            for (IndividualType& individual: new_generation) {
+            for (Candidate& c: new_generation) {
                 if (utils::generateIntegerNumber<unsigned int>(0, 100) <
                         _mutation_prob) {
 
-                    (individual.*_mutation_op)();
+                    (c.individual.*_mutation_op)();
                 }
             }
         }
