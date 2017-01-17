@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/TraditionalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-10 05:40:08
-// Modified: 2017-01-14 22:06:11
+// Modified: 2017-01-17 14:27:01
 
 #ifndef TRADITIONALGA_H
 #define TRADITIONALGA_H
@@ -27,6 +27,10 @@ template <typename IndividualType>
 class TraditionalGA
 {
     public:
+        using MutationOperator = void (IndividualType::*)();
+        using ReproductionOperator =
+            IndividualType (IndividualType::*)(IndividualType const& rhs) const;
+
         struct Candidate
         {
             IndividualType  individual;
@@ -55,68 +59,84 @@ class TraditionalGA
         run()
         {
             IndividualType::generateRandomPopulation(_p_size, _population);
-            while (true) {    // TODO put real condition
+            while (should_run()) {
+                std::vector<Candidate const*> selected_candidates;
+                std::vector<Candidate> new_generation;
 
                 // compute fitness of individuals
                 for (Candidate& c: _population) {
                     c.fitness = compute_fitness(c.individual);
                 }
+
+                selection_process(selected_candidates);
+                create_new_generation(new_generation, selected_candidates);
+                // TODO return instead of ref to improve performance ?
+                _population = new_generation;
             }
         }
 
     protected:
-        // TODO array of iterators for selected ?
         virtual void
-        selection(std::vector<Candidate*>& selected_candidates)
+        selection_process(std::vector<Candidate const*>& selection) const
         {
-            std::list<Candidate*>   candidates(_population.size());
-            // std::list because deletion is more efficient
-
             if (_population.empty())
                 return ; // TODO throw exception ?
 
-            for (Candidate& c: _population)
-                candidates.push_back(&c);
+            unsigned int total_fitnesses = std::accumulate(
+                    _population.begin(), _population.end(), 0,
+                    [](unsigned int sum, Candidate const& c)
+                    { return sum += c.fitness; }
+                );
 
-            for (unsigned int i = 0;
-                 i < _nb_selected && !candidates.empty();
-                 ++i) {
+            for (unsigned int i = 0; i < _p_size; ++i) {
 
-                unsigned int total_fitnesses = std::accumulate(
-                        candidates.begin(), candidates.end(), 0,
-                        [](unsigned int sum, Candidate const* c)
-                        { return sum += c->fitness; }
-                    );
                 unsigned int random_value =
                     utils::generateIntegerNumber<unsigned int>(
                         0, total_fitnesses
                     );
                 unsigned int tmp = 0;
                 auto selected = std::find_if(
-                    candidates.begin(), candidates.end(),
-                    [&tmp, random_value](Candidate* c)
+                    _population.begin(), _population.end(),
+                    [&tmp, random_value](Candidate const& c)
                     {
-                        tmp += c->fitness;
+                        tmp += c.fitness;
                         return random_value <= tmp;
                     }
                 );
 
-                selected_candidates.push_back(*selected);
-                candidates.erase(selected);
+                selection.push_back(&(*selected));
+            }
+        }
+
+        virtual void
+        create_new_generation(std::vector<IndividualType>& new_generation,
+                std::vector<Candidate const*> const& selection) const
+        {
+            // reproduction
+            for (Candidate const* const& c: selection) {
+                IndividualType const& i = c->individual;
+
+                new_generation.emplace_back(
+                    (i.*_reproduction_op)(i) // TODO fix parameter
+                );
+            }
+
+            // mutation
+            for (IndividualType& individual: new_generation) {
+                (individual.*_mutation_op)();
             }
         }
 
         // functions to implement when inherited
-        virtual unsigned int
-        compute_fitness(IndividualType const&) const
-        {
-            throw exceptions::NotImplemented("compute_fitness()");
-        }
+        virtual unsigned int compute_fitness(IndividualType const&) const = 0;
+        virtual bool should_run() const = 0;
 
     protected:
-        std::vector<Candidate>  _population;
-        unsigned int            _p_size;
-        unsigned int            _nb_selected;
+        std::vector<Candidate>          _population;
+        unsigned int                    _p_size;
+        unsigned int                    _no_generation;
+        MutationOperator                _mutation_op;
+        ReproductionOperator            _reproduction_op;
 };
 
 } // end namespace ga

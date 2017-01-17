@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/GACHC.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-13 18:53:53
-// Modified: 2017-01-14 01:08:47
+// Modified: 2017-01-17 14:13:52
 
 #ifndef GACHC_H
 #define GACHC_H
@@ -13,12 +13,16 @@
 
 namespace ga {
 
-template <typename CandidateType>
-class GACHC : public TraditionalGA<CandidateType>
+template <typename IndividualType>
+class GACHC : public TraditionalGA<IndividualType>
 {
     public:
-        GACHC() : TraditionalGA<CandidateType>(10) // TODO
+        GACHC() : TraditionalGA<IndividualType>(10) // TODO
         {}
+
+        virtual unsigned int
+        compute_fitness(IndividualType const&) const { return 0; }
+        virtual bool should_run() const { return true; }
 };
 
 }
