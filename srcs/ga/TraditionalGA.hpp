@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/TraditionalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-10 05:40:08
-// Modified: 2017-01-17 15:50:08
+// Modified: 2017-01-19 11:02:28
 
 #ifndef TRADITIONALGA_H
 #define TRADITIONALGA_H
@@ -12,7 +12,8 @@
 #include <algorithm>
 #include <list>
 #include <vector>
-#include "NotImplemented.hpp"
+#include <utility>
+#include <stdexcept>
 #include "random.hpp"
 
 namespace ga {
@@ -29,7 +30,8 @@ class TraditionalGA
     public:
         using MutationOperator = void (IndividualType::*)();
         using ReproductionOperator =
-            IndividualType (IndividualType::*)(IndividualType const& rhs) const;
+            std::pair<IndividualType, IndividualType>
+            (IndividualType::*)(IndividualType const& rhs) const;
 
         struct Candidate
         {
@@ -69,9 +71,8 @@ class TraditionalGA
                 }
 
                 selection_process(selected_candidates);
-                create_new_generation(new_generation, selected_candidates);
-                // TODO return instead of ref to improve performance ?
-                _population = new_generation;
+                _population =
+                    create_new_generation(new_generation, selected_candidates);
             }
         }
 
@@ -80,7 +81,8 @@ class TraditionalGA
         selection_process(std::vector<Candidate const*>& selection) const
         {
             if (_population.empty())
-                return ; // TODO throw exception ?
+                throw std::runtime_error("Selection procedure failed:"
+                                         "Population is empty");
 
             unsigned int total_fitnesses = std::accumulate(
                     _population.begin(), _population.end(), 0,
@@ -123,13 +125,20 @@ class TraditionalGA
                 if (utils::generateIntegerNumber<unsigned int>(0, 100) <
                         _reproduction_prob) {
 
+                    std::pair<IndividualType, IndividualType>   children =
+                        (father.*_reproduction_op)(mother);
+
                     // reproduce and make two children
                     new_generation.push_back(
-                        { (father.*_reproduction_op)(mother), 0 }
+                        { children.first, 0 }
                     );
                     new_generation.push_back(
-                        { (mother.*_reproduction_op)(father), 0 }
+                        { children.second, 0 }
                     );
+                } else {
+                    // if no reproduction, we keep the parents
+                    new_generation.push_back({ father, 0 });
+                    new_generation.push_back({ mother, 0 });
                 }
             }
 

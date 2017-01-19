@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/utils/random.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-14 01:36:25
-// Modified: 2017-01-17 14:57:47
+// Modified: 2017-01-19 11:17:56
 
 #ifndef RANDOM_H
 #define RANDOM_H
@@ -56,6 +56,32 @@ generateRealNumber(float min, float max)
 {
     return generateNumber<float,
            std::uniform_real_distribution<float>>(min, max);
+}
+
+// generate random bit
+template <typename BitType = bool,
+          typename Generator = std::mt19937>
+BitType
+generateRandomBit(double prob = 0.5)
+{
+    static std::random_device           rd;
+    static Generator                    mt(rd());
+    static std::bernoulli_distribution  dist(prob);
+
+    return dist(mt);
+}
+
+// generate random bitset
+template <size_t S>
+std::bitset<S>
+generateRandomBitset(double prob = 0.5)
+{
+    std::bitset<S> res;
+
+    for (unsigned int i = 0; i < S; ++i) {
+        res[i] = generateRandomBit(prob);
+    }
+    return res;
 }
 
 }
