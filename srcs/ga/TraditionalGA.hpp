@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/TraditionalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-10 05:40:08
-// Modified: 2017-01-19 11:02:28
+// Modified: 2017-01-19 14:57:20
 
 #ifndef TRADITIONALGA_H
 #define TRADITIONALGA_H

@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/FixedChromosomeRepresentation.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-15 20:57:05
-// Modified: 2017-01-19 10:57:26
+// Modified: 2017-01-20 13:00:49
 
 #ifndef FIXEDCHROMOSOMEREPRESENTATION_H
 #define FIXEDCHROMOSOMEREPRESENTATION_H
@@ -13,18 +13,25 @@
 #include <bitset>
 #include <utility>
 #include "random.hpp"
+#include "IStringRepresentation.hpp"
 
 namespace ga {
 
 template <std::size_t S>
-class FixedChromosomeRepresentation
+class FixedChromosomeRepresentation : public utils::IStringRepresentation
 {
     public:
         FixedChromosomeRepresentation()
         {
         }
 
-        virtual ~FixedChromosomeRepresentation()
+        FixedChromosomeRepresentation(std::bitset<S> const& bitset)
+            : _rep(bitset)
+        {
+        }
+
+        virtual
+        ~FixedChromosomeRepresentation()
         {
         }
 
@@ -45,45 +52,56 @@ class FixedChromosomeRepresentation
     public:
         std::pair<FixedChromosomeRepresentation<S>,
                   FixedChromosomeRepresentation<S>>
-        crossover_singlepoint(FixedChromosomeRepresentation<S> const& rhs)
+        crossover_singlepoint(FixedChromosomeRepresentation<S> const& rhs) const
         {
-            FixedChromosomeRepresentation<S>    child;
+            FixedChromosomeRepresentation<S>    child_a;
+            FixedChromosomeRepresentation<S>    child_b;
             unsigned int                        point =
-                utils::generateIntegerNumber<unsigned int>(0, S);
+                utils::generateIntegerNumber<unsigned int>(1, S - 1);
+            // crossover is ineffective if point is 0 or S - 1
 
             for (unsigned int i = 0; i < S; ++i) {
-                child._rep[i] = (i < point ? _rep[i] : rhs[i]);
+                if (i < point) {
+                    child_a._rep[i] = _rep.test(i);
+                    child_b._rep[i] = rhs._rep.test(i);
+                } else {
+                    child_a._rep[i] = rhs._rep.test(i);
+                    child_b._rep[i] = _rep.test(i);
+                }
             }
-            return make_reps_pair(child);
+            return std::make_pair(child_a, child_b);
         }
 
         std::pair<FixedChromosomeRepresentation<S>,
                   FixedChromosomeRepresentation<S>>
-        crossover_twopoint(FixedChromosomeRepresentation<S> const& rhs)
+        crossover_twopoint(FixedChromosomeRepresentation<S> const& rhs) const
         {
-            FixedChromosomeRepresentation<S>    child;
+            FixedChromosomeRepresentation<S>    child_a;
+            FixedChromosomeRepresentation<S>    child_b;
             unsigned int                        first_point =
-                utils::generateIntegerNumber<unsigned int>(0, S);
+                utils::generateIntegerNumber<unsigned int>(1, S - 1);
             unsigned int                        second_point =
-                utils::generateIntegerNumber<unsigned int>(0, S);
+                utils::generateIntegerNumber<unsigned int>(1, S - 1);
+            // crossover is singlepoint if point is 0 or S
 
             if (second_point < first_point)
                 std::swap(first_point, second_point);
             for (unsigned int i = 0; i < S; ++i) {
-                child._rep[i] = (i < first_point or i > second_point
-                                 ? _rep[i] : rhs[i]);
+                if (i < first_point or i > second_point) {
+                    child_a._rep[i] = _rep.test(i);
+                    child_b._rep[i] = rhs._rep.test(i);
+                } else {
+                    child_a._rep[i] = rhs._rep.test(i);
+                    child_b._rep[i] = _rep.test(i);
+                }
             }
-            return make_reps_pair(child);
+            return std::make_pair(child_a, child_b);
         }
 
-        static std::pair<FixedChromosomeRepresentation<S>,
-                         FixedChromosomeRepresentation<S>>
-        make_reps_pair(FixedChromosomeRepresentation<S> const& rep)
+        virtual std::string
+        to_string() const
         {
-            FixedChromosomeRepresentation<S> other = rep;
-
-            other.flip();
-            return std::make_pair(rep, other);
+            return _rep.to_string();
         }
 
     protected:
