@@ -1,23 +1,23 @@
 // C/C++ File
 
 // Author:   Alexandre Tea <alexandre.qtea@gmail.com>
-// File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/GACHC.hpp
+// File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/CHCGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-13 18:53:53
-// Modified: 2017-01-17 14:13:52
+// Modified: 2017-02-08 14:59:02
 
-#ifndef GACHC_H
-#define GACHC_H
+#ifndef CHCGA_H
+#define CHCGA_H
 
-#include "TraditionalGA.hpp"
+#include "ClassicalGA.hpp"
 
 namespace ga {
 
 template <typename IndividualType>
-class GACHC : public TraditionalGA<IndividualType>
+class CHCGA : public ClassicalGA<IndividualType>
 {
     public:
-        GACHC() : TraditionalGA<IndividualType>(10) // TODO
+        CHCGA() : ClassicalGA<IndividualType>(10) // TODO
         {}
 
         virtual unsigned int
@@ -27,4 +27,4 @@ class GACHC : public TraditionalGA<IndividualType>
 
 }
 
-#endif /* end of include guard: GACHC_H */
+#endif /* end of include guard: CHCGA_H */

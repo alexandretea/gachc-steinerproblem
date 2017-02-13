@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/utils/random.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-14 01:36:25
-// Modified: 2017-01-19 11:17:56
+// Modified: 2017-02-13 15:12:09
 
 #ifndef RANDOM_H
 #define RANDOM_H
@@ -41,22 +41,6 @@ generateIntegerNumber(IntegerType min, IntegerType max)
 template <typename RealType>
 RealType
 generateRealNumber(RealType min, RealType max);
-
-template <>
-double
-generateRealNumber(double min, double max)
-{
-    return generateNumber<double,
-           std::uniform_real_distribution<double>>(min, max);
-}
-
-template <>
-float
-generateRealNumber(float min, float max)
-{
-    return generateNumber<float,
-           std::uniform_real_distribution<float>>(min, max);
-}
 
 // generate random bit
 template <typename BitType = bool,

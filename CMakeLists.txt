@@ -9,6 +9,7 @@ include(CheckIncludeFileCXX)
 
 include_directories(
     srcs/ga
+    srcs/gsp
     srcs/exceptions
     srcs/utils
 )
@@ -19,6 +20,7 @@ set(LIBS
 file(GLOB sources
 	srcs/*.cpp
 	srcs/ga/*.cpp
+	srcs/gsp/*.cpp
 	srcs/utils/*.cpp
 	srcs/exceptions/*.cpp
 )

@@ -1,13 +1,13 @@
 // C/C++ File
 
 // Author:   Alexandre Tea <alexandre.qtea@gmail.com>
-// File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/TraditionalGA.hpp
+// File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/ClassicalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-10 05:40:08
-// Modified: 2017-01-19 14:57:20
+// Modified: 2017-02-13 14:32:59
 
-#ifndef TRADITIONALGA_H
-#define TRADITIONALGA_H
+#ifndef CLASSICALGA_H
+#define CLASSICALGA_H
 
 #include <algorithm>
 #include <list>
@@ -18,14 +18,17 @@
 
 namespace ga {
 
-// TODO template constraint
+// ClassicalGA is a functor
 //
 // IndividualType should implement:
 //     - static void generateRandomPopulation(unsigned int p_size,
 //                                            std::vector<Candidate>& p)
 //     - virtual unsigned int compute_fitness(IndividualType const& const)
+//
+// TODO template constraint
+// TODO log
 template <typename IndividualType>
-class TraditionalGA
+class ClassicalGA
 {
     public:
         using MutationOperator = void (IndividualType::*)();
@@ -39,8 +42,13 @@ class TraditionalGA
             unsigned int    fitness;
         };
 
-    protected:  // TraditionalGA cannot be instanciated without being inherited
-        TraditionalGA(unsigned int p_size) : _p_size(p_size)
+    protected:  // ClassicalGA cannot be instanciated without being inherited
+        ClassicalGA(unsigned int p_size,
+                ReproductionOperator const& rep_op, unsigned int p_rep,
+                MutationOperator const& mut_op, unsigned int p_mut)
+            : _p_size(p_size),
+              _mutation_op(mut_op),_reproduction_op(rep_op),
+              _mutation_prob(p_mut), _reproduction_prob(p_rep)
         {
             // set vector capacity to population size as it is fixed
             // used a vector instead of an array so it is reusable when the
@@ -49,18 +57,18 @@ class TraditionalGA
         }
 
     public:
-        virtual ~TraditionalGA()
+        virtual ~ClassicalGA()
         {
         }
 
-        TraditionalGA(TraditionalGA const& other) = delete;
-        TraditionalGA& operator=(TraditionalGA const& other) = delete;
+        ClassicalGA(ClassicalGA const& other) = delete;
+        ClassicalGA&    operator=(ClassicalGA const& other) = delete;
 
     public:
-        void
-        run()
+        Candidate
+        operator()()
         {
-            IndividualType::generateRandomPopulation(_p_size, _population);
+            generateRandomPopulation();
             while (should_run()) {
                 std::vector<Candidate const*> selected_candidates;
                 std::vector<Candidate> new_generation;
@@ -71,9 +79,12 @@ class TraditionalGA
                 }
 
                 selection_process(selected_candidates);
-                _population =
-                    create_new_generation(new_generation, selected_candidates);
+                create_new_generation(new_generation, selected_candidates);
+                _population = new_generation; // TODO useless step through newg?
             }
+            return std::max(_population.begin(), _population.end(),
+                            [](Candidate const& a, Candidate const& b)
+                            { return a.fitness < b.fitness; });
         }
 
     protected:
@@ -152,6 +163,14 @@ class TraditionalGA
             }
         }
 
+        virtual void
+        generateRandomPopulation()
+        {
+            for (unsigned int i = 0; i < _p_size; ++i) {
+                _population.push_back({ IndividualType::generateRandom(), 0 });
+            }
+        }
+
         // functions to implement when inherited
         virtual unsigned int compute_fitness(IndividualType const&) const = 0;
         virtual bool should_run() const = 0;
@@ -170,4 +189,4 @@ class TraditionalGA
 
 } // end namespace ga
 
-#endif /* end of include guard: TRADITIONALGA_H */
+#endif /* end of include guard: CLASSICALGA_H */
