@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/FixedBinaryString.cpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-02-13 14:11:43
-// Modified: 2017-02-13 15:54:29
+// Modified: 2017-02-21 23:40:28
 
 #include "FixedBinaryString.hpp"
 
@@ -54,6 +54,12 @@ FixedBinaryString::test(unsigned int index) const
     return _rep.at(index);
 }
 
+size_t
+FixedBinaryString::size() const
+{
+    return _rep_size;
+}
+
 FixedBinaryString::ChildPair
 FixedBinaryString::crossover_singlepoint(FixedBinaryString const& rhs) const
 {
@@ -100,8 +106,24 @@ FixedBinaryString::crossover_twopoint(FixedBinaryString const& rhs) const
     return std::make_pair(child_a, child_b);
 }
 
+void
+FixedBinaryString::flip_all()
+{
+    _rep.flip();
+}
+
+void
+FixedBinaryString::flip_random()
+{
+    for (auto bit: _rep) {
+        if (utils::generateIntegerNumber<unsigned int>(1, _rep_size) == 1) {
+            bit = !bit;
+        }
+    }
+}
+
 FixedBinaryString
-FixedBinaryString::generateRandom()
+FixedBinaryString::generate_random()
 {
     // TODO
     return FixedBinaryString(10);

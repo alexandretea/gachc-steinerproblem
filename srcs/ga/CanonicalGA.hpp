@@ -1,13 +1,13 @@
 // C/C++ File
 
 // Author:   Alexandre Tea <alexandre.qtea@gmail.com>
-// File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/ClassicalGA.hpp
+// File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/CanonicalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-10 05:40:08
-// Modified: 2017-02-13 14:32:59
+// Modified: 2017-02-21 23:33:07
 
-#ifndef CLASSICALGA_H
-#define CLASSICALGA_H
+#ifndef CANONICALGA_H
+#define CANONICALGA_H
 
 #include <algorithm>
 #include <list>
@@ -18,7 +18,7 @@
 
 namespace ga {
 
-// ClassicalGA is a functor
+// CanonicalGA is a functor
 //
 // IndividualType should implement:
 //     - static void generateRandomPopulation(unsigned int p_size,
@@ -28,7 +28,7 @@ namespace ga {
 // TODO template constraint
 // TODO log
 template <typename IndividualType>
-class ClassicalGA
+class CanonicalGA
 {
     public:
         using MutationOperator = void (IndividualType::*)();
@@ -42,8 +42,8 @@ class ClassicalGA
             unsigned int    fitness;
         };
 
-    protected:  // ClassicalGA cannot be instanciated without being inherited
-        ClassicalGA(unsigned int p_size,
+    protected:  // CanonicalGA cannot be instanciated without being inherited
+        CanonicalGA(unsigned int p_size,
                 ReproductionOperator const& rep_op, unsigned int p_rep,
                 MutationOperator const& mut_op, unsigned int p_mut)
             : _p_size(p_size),
@@ -57,12 +57,12 @@ class ClassicalGA
         }
 
     public:
-        virtual ~ClassicalGA()
+        virtual ~CanonicalGA()
         {
         }
 
-        ClassicalGA(ClassicalGA const& other) = delete;
-        ClassicalGA&    operator=(ClassicalGA const& other) = delete;
+        CanonicalGA(CanonicalGA const& other) = delete;
+        CanonicalGA&    operator=(CanonicalGA const& other) = delete;
 
     public:
         Candidate
@@ -167,7 +167,7 @@ class ClassicalGA
         generateRandomPopulation()
         {
             for (unsigned int i = 0; i < _p_size; ++i) {
-                _population.push_back({ IndividualType::generateRandom(), 0 });
+                _population.push_back({ IndividualType::generate_random(), 0 });
             }
         }
 
@@ -189,4 +189,4 @@ class ClassicalGA
 
 } // end namespace ga
 
-#endif /* end of include guard: CLASSICALGA_H */
+#endif /* end of include guard: CANONICALGA_H */
