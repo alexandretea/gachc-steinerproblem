@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/CanonicalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-10 05:40:08
-// Modified: 2017-02-21 23:33:07
+// Modified: 2017-03-01 02:05:37
 
 #ifndef CANONICALGA_H
 #define CANONICALGA_H
@@ -82,9 +82,14 @@ class CanonicalGA
                 create_new_generation(new_generation, selected_candidates);
                 _population = new_generation; // TODO useless step through newg?
             }
-            return std::max(_population.begin(), _population.end(),
-                            [](Candidate const& a, Candidate const& b)
-                            { return a.fitness < b.fitness; });
+
+            auto it =
+                std::max_element(_population.begin(), _population.end(),
+                                 [](Candidate const& a, Candidate const& b)
+                                 { return a.fitness < b.fitness; });
+            if (it == _population.end())
+                throw std::runtime_error("Population is empty");
+            return *it;
         }
 
     protected:

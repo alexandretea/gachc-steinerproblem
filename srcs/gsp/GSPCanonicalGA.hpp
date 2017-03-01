@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/CanonicalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-20 13:21:03
-// Modified: 2017-02-21 23:46:15
+// Modified: 2017-03-01 02:06:59
 
 #ifndef GSPCANONICALGA_HPP_
 #define GSPCANONICALGA_HPP_
@@ -21,8 +21,6 @@ class CanonicalGA : public ga::CanonicalGA<ga::FixedBinaryString>
         using TGA = ga::CanonicalGA<CandidateSolution>;
 
     public:
-        // TODO let user choose reproduction operator or ..?
-        // OR MULTIPLE CONSTRUCTORS OR DEFAULT VALUE
         CanonicalGA(unsigned int p_size,
                typename TGA::ReproductionOperator const& rep_op,
                unsigned int p_rep,
@@ -34,7 +32,7 @@ class CanonicalGA : public ga::CanonicalGA<ga::FixedBinaryString>
 
         CanonicalGA(unsigned int p_size, unsigned int p_rep, unsigned int p_mut)
             : TGA(p_size, &CandidateSolution::crossover_twopoint, p_rep,
-                  &CandidateSolution::flip_random, p_mut) // TODO flipRandom>
+                  &CandidateSolution::flip_random, p_mut)
         {
         }
 
@@ -49,13 +47,13 @@ class CanonicalGA : public ga::CanonicalGA<ga::FixedBinaryString>
         virtual unsigned int
         compute_fitness(CandidateSolution const&) const
         {
-            return 0;
+            return 0; // TODO
         }
 
         virtual bool
         should_run() const
         {
-            return true;
+            return true; // TODO
         }
 };
 
