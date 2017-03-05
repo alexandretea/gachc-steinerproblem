@@ -4,18 +4,19 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/main.cpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-13 18:35:57
-// Modified: 2017-03-01 02:06:29
+// Modified: 2017-03-05 18:46:53
 
 #include <cstdlib>
 #include <iostream>
 #include "GSPSolver.hpp"
 #include "FixedBinaryString.hpp"
 #include "GSPCanonicalGA.hpp"
+#include "GSPGraph.hpp"
 
 int
 main(int /*ac*/, char** /*av*/)
 {
-    gsp::GraphRep   graph;
+    gsp::Graph<std::string>       graph;
     gsp::Solver<gsp::CanonicalGA> gsp_solver(graph);
 
     try {
