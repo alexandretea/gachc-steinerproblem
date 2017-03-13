@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/CanonicalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-20 13:21:03
-// Modified: 2017-03-05 16:31:06
+// Modified: 2017-03-13 17:04:14
 
 #ifndef GSPCANONICALGA_HPP_
 #define GSPCANONICALGA_HPP_
@@ -25,18 +25,22 @@ class CanonicalGA : public ga::CanonicalGA<ga::FixedBinaryString>
         using TGA = ga::CanonicalGA<CandidateSolution>;
 
     public:
-        CanonicalGA(unsigned int p_size,
+        CanonicalGA(EdgeContainer const& graph,
+                    unsigned int p_size,
                     typename TGA::ReproductionOperator const& rep_op,
                     unsigned int p_rep,
                     typename TGA::MutationOperator const& mut_op,
                     unsigned int p_mut)
-            : TGA(p_size, rep_op, p_rep, mut_op, p_mut)
+            : TGA(p_size, rep_op, p_rep, mut_op, p_mut), _initial_graph(graph)
         {
         }
 
-        CanonicalGA(unsigned int p_size, unsigned int p_rep, unsigned int p_mut)
+        CanonicalGA(EdgeContainer const& graph,
+                    unsigned int p_size, unsigned int p_rep, unsigned int p_mut)
             : TGA(p_size, &CandidateSolution::crossover_twopoint, p_rep,
-                  &CandidateSolution::flip_random, p_mut)
+                  &CandidateSolution::flip_random, p_mut),
+              _initial_graph(graph)
+
         {
         }
 
@@ -63,7 +67,7 @@ class CanonicalGA : public ga::CanonicalGA<ga::FixedBinaryString>
         // TODO feasibility check for terminal node requirements!!!
 
     protected:
-        EdgeContainer   _original_graph;
+        EdgeContainer   _initial_graph;
 };
 
 }

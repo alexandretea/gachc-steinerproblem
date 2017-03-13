@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/GSPSolver.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-24 12:33:08
-// Modified: 2017-03-05 18:47:39
+// Modified: 2017-03-13 17:05:49
 
 #ifndef GSPSOLVER_H
 #define GSPSOLVER_H
@@ -20,7 +20,7 @@
 
 namespace gsp {
 
-// T_GA is a class template
+// T_GA is a class template of a functor
 template <template<typename> class T_GA>
 class Solver
 {
@@ -60,6 +60,7 @@ class Solver
         init_algorithm()
         {
             _algorithm = std::make_unique<T_GA<NodeID>>(
+                    _initial_graph.get_edges(),
                     _pop_size, _prob_rep, _prob_mut
                 );
         }
