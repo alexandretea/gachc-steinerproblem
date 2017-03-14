@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/CanonicalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-10 05:40:08
-// Modified: 2017-03-14 17:26:44
+// Modified: 2017-03-14 18:34:31
 
 #ifndef CANONICALGA_H
 #define CANONICALGA_H
@@ -111,7 +111,7 @@ class CanonicalGA
             for (unsigned int i = 0; i < _p_size; ++i) {
 
                 unsigned int random_value =
-                    utils::generateIntegerNumber<unsigned int>(
+                    utils::generate_integer_number<unsigned int>(
                         0, total_fitnesses
                     );
                 unsigned int tmp = 0;
@@ -126,7 +126,7 @@ class CanonicalGA
 
                 selection.push_back(&(*selected));
             }
-        }
+        } // TODO check if ok
 
         virtual void
         create_new_generation(std::vector<Candidate>& new_generation,
@@ -135,12 +135,12 @@ class CanonicalGA
             // reproduction
             for (auto f = selection.begin(), m = std::next(f);
                  f != selection.end() && m != selection.end();
-                 ++f, ++m) {
+                 f += 2, m += 2) { // TODO check if ok
 
                 IndividualType const& father = (*f)->individual;
                 IndividualType const& mother = (*m)->individual;
 
-                if (utils::generateIntegerNumber<unsigned int>(0, 100) <
+                if (utils::generate_integer_number<unsigned int>(0, 100) <
                         _reproduction_prob) {
 
                     std::pair<IndividualType, IndividualType>   children =
@@ -162,7 +162,7 @@ class CanonicalGA
 
             // mutation
             for (Candidate& c: new_generation) {
-                if (utils::generateIntegerNumber<unsigned int>(0, 100) <
+                if (utils::generate_integer_number<unsigned int>(0, 100) <
                         _mutation_prob) {
 
                     (c.individual.*_mutation_op)();
@@ -174,7 +174,7 @@ class CanonicalGA
         generateRandomPopulation()
         {
             for (unsigned int i = 0; i < _p_size; ++i) {
-                _population.push_back({ IndividualType::generate_random(), 0 });
+                _population.push_back({ generate_random_individual(), 0 });
             }
         }
 
@@ -185,11 +185,12 @@ class CanonicalGA
         // functions to implement when inherited
         virtual unsigned int compute_fitness(IndividualType const&) const = 0;
         virtual bool should_run() const = 0;
+        virtual IndividualType generate_random_individual() const = 0;
 
     protected:
         std::vector<Candidate>          _population;
         unsigned int                    _p_size;
-        unsigned int                    _no_generation;
+        //unsigned int                    _no_generation; // TODO useless?
         MutationOperator                _mutation_op;
         ReproductionOperator            _reproduction_op;
 

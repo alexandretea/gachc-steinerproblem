@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/Edge.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-03-05 14:53:28
-// Modified: 2017-03-14 16:02:15
+// Modified: 2017-03-14 18:08:17
 
 #ifndef GSPGRAPH_HPP_
 #define GSPGRAPH_HPP_
@@ -167,12 +167,6 @@ class Graph
 
         // TODO removal functions
 
-        EdgeContainer const&
-        get_edges() const
-        {
-            return _edges;
-        }
-
         Node const&
         get_node(IDType const& id) const
         {
@@ -201,6 +195,12 @@ class Graph
         get_total_cost() const
         {
             return _total_cost;
+        }
+
+        unsigned int
+        get_nb_edges() const
+        {
+            return _edges.size();
         }
 
         /*

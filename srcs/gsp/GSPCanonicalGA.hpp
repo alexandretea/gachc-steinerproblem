@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/CanonicalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-20 13:21:03
-// Modified: 2017-03-14 17:21:09
+// Modified: 2017-03-14 18:15:10
 
 #ifndef GSPCANONICALGA_HPP_
 #define GSPCANONICALGA_HPP_
@@ -30,19 +30,22 @@ class CanonicalGA : public ga::CanonicalGA<ga::FixedBinaryString>
                     typename TGA::ReproductionOperator const& rep_op,
                     unsigned int p_rep,
                     typename TGA::MutationOperator const& mut_op,
-                    unsigned int p_mut)
+                    unsigned int p_mut,
+                    bool debug = false)
             : TGA(p_size, rep_op, p_rep, mut_op, p_mut),
-              _initial_graph(graph), _nb_cycles(nb_cycles), _current_cycle(0)
+              _initial_graph(graph), _nb_cycles(nb_cycles), _current_cycle(0),
+              _debug(debug)
         {
         }
 
         CanonicalGA(gsp::Graph<NodeIdType> const& graph,
                     unsigned int nb_cycles,
-                    unsigned int p_size, unsigned int p_rep, unsigned int p_mut)
+                    unsigned int p_size, unsigned int p_rep, unsigned int p_mut,
+                    bool debug = false)
             : TGA(p_size, &CandidateSolution::crossover_twopoint, p_rep,
                   &CandidateSolution::flip_random, p_mut),
-              _initial_graph(graph), _nb_cycles(nb_cycles), _current_cycle(0)
-
+              _initial_graph(graph), _nb_cycles(nb_cycles), _current_cycle(0),
+              _debug(debug)
         {
         }
 
@@ -80,9 +83,19 @@ class CanonicalGA : public ga::CanonicalGA<ga::FixedBinaryString>
             return _current_cycle < _nb_cycles;
         }
 
+        virtual CandidateSolution
+        generate_random_individual() const
+        {
+            return CandidateSolution::random(
+                        _initial_graph.get_nb_edges()
+                    );
+        }
+
         virtual void
         hook_cycle_end()
         {
+            std::cout << "[debug] Cycle #" << _current_cycle
+                      << "\t" << _population.size() << std::endl;
             ++_current_cycle;
         }
 
@@ -92,6 +105,7 @@ class CanonicalGA : public ga::CanonicalGA<ga::FixedBinaryString>
         gsp::Graph<NodeIdType>  _initial_graph;
         unsigned int            _nb_cycles;
         unsigned int            _current_cycle;
+        bool                    _debug;
 };
 
 }

@@ -4,8 +4,9 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/FixedBinaryString.cpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-02-13 14:11:43
-// Modified: 2017-03-14 17:29:57
+// Modified: 2017-03-14 18:17:38
 
+#include <bitset>
 #include "FixedBinaryString.hpp"
 
 namespace ga {
@@ -72,7 +73,7 @@ FixedBinaryString::crossover_singlepoint(FixedBinaryString const& rhs) const
     FixedBinaryString   child_a(_rep_size);
     FixedBinaryString   child_b(_rep_size);
     unsigned int        point =
-        utils::generateIntegerNumber<unsigned int>(1, _rep_size - 1);
+        utils::generate_integer_number<unsigned int>(1, _rep_size - 1);
     // crossover is ineffective if point is 0 or _rep_size - 1
 
     for (unsigned int i = 0; i < _rep_size; ++i) {
@@ -93,9 +94,9 @@ FixedBinaryString::crossover_twopoint(FixedBinaryString const& rhs) const
     FixedBinaryString   child_a(_rep_size);
     FixedBinaryString   child_b(_rep_size);
     unsigned int        first_point =
-        utils::generateIntegerNumber<unsigned int>(1, _rep_size - 1);
+        utils::generate_integer_number<unsigned int>(1, _rep_size - 1);
     unsigned int        second_point =
-        utils::generateIntegerNumber<unsigned int>(1, _rep_size - 1);
+        utils::generate_integer_number<unsigned int>(1, _rep_size - 1);
     // crossover is singlepoint if point is 0 or S
 
     if (second_point < first_point)
@@ -122,17 +123,21 @@ void
 FixedBinaryString::flip_random()
 {
     for (auto bit: _rep) {
-        if (utils::generateIntegerNumber<unsigned int>(1, _rep_size) == 1) {
+        if (utils::generate_integer_number<unsigned int>(1, _rep_size) == 1) {
             bit = !bit;
         }
     }
 }
 
 FixedBinaryString
-FixedBinaryString::generate_random()
+FixedBinaryString::random(const size_t size)
 {
-    // TODO
-    return FixedBinaryString(10);
+    FixedBinaryString   res(size);
+
+    for (auto bit: res) {
+        bit = utils::generate_random_bit();
+    }
+    return res;
 }
 
 std::string

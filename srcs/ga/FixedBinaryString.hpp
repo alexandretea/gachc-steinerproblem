@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/FixedBinaryString.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-15 20:57:05
-// Modified: 2017-03-14 16:21:01
+// Modified: 2017-03-14 18:14:48
 
 #ifndef FIXEDBINARYSTRING_H
 #define FIXEDBINARYSTRING_H
@@ -56,7 +56,7 @@ class FixedBinaryString : public utils::IStringRepresentation
 
     public:
         virtual std::string         to_string() const;
-        static FixedBinaryString    generate_random();
+        static FixedBinaryString    random(size_t size);
 
     protected:
         size_t          _rep_size;

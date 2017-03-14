@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/utils/random.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-14 01:36:25
-// Modified: 2017-02-13 15:12:09
+// Modified: 2017-03-14 18:13:00
 
 #ifndef RANDOM_H
 #define RANDOM_H
@@ -17,7 +17,7 @@ template <typename NumberType,
           typename Distribution,
           typename Generator = std::mt19937>
 NumberType
-generateNumber(NumberType min, NumberType max)
+generate_number(NumberType min, NumberType max)
 {
     static std::random_device  rd;
     static Generator           mt(rd());
@@ -29,9 +29,9 @@ generateNumber(NumberType min, NumberType max)
 // generate number with no decimal point
 template <typename IntegerType>
 IntegerType
-generateIntegerNumber(IntegerType min, IntegerType max)
+generate_integer_number(IntegerType min, IntegerType max)
 {
-    return generateNumber<IntegerType,
+    return generate_number<IntegerType,
            std::uniform_int_distribution<IntegerType>>(min, max);
 }
 
@@ -40,13 +40,13 @@ generateIntegerNumber(IntegerType min, IntegerType max)
 // doubles and floats
 template <typename RealType>
 RealType
-generateRealNumber(RealType min, RealType max);
+generate_real_number(RealType min, RealType max);
 
 // generate random bit
 template <typename BitType = bool,
           typename Generator = std::mt19937>
 BitType
-generateRandomBit(double prob = 0.5)
+generate_random_bit(double prob = 0.5)
 {
     static std::random_device           rd;
     static Generator                    mt(rd());
@@ -58,12 +58,12 @@ generateRandomBit(double prob = 0.5)
 // generate random bitset
 template <size_t S>
 std::bitset<S>
-generateRandomBitset(double prob = 0.5)
+generate_random_bitset(double prob = 0.5)
 {
     std::bitset<S> res;
 
     for (unsigned int i = 0; i < S; ++i) {
-        res[i] = generateRandomBit(prob);
+        res[i] = generate_random_bit(prob);
     }
     return res;
 }

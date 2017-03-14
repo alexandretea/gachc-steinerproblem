@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/GSPSolver.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-24 12:33:08
-// Modified: 2017-03-14 17:28:42
+// Modified: 2017-03-14 18:35:42
 
 #ifndef GSPSOLVER_H
 #define GSPSOLVER_H
@@ -56,6 +56,7 @@ class Solver
             init_algorithm();
             solution = (*_algorithm)();
             std::cout << "Solution: " << solution.to_string() << std::endl;
+            // TODO translate to graph
             return result;
         }
 
@@ -66,7 +67,8 @@ class Solver
             _algorithm = std::make_unique<T_GA<NodeID>>(
                     _initial_graph,
                     1000, // TODO
-                    _pop_size, _prob_rep, _prob_mut
+                    _pop_size, _prob_rep, _prob_mut,
+                    true // TODO
                 );
         }
 
