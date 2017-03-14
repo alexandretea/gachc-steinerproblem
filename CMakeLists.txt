@@ -8,6 +8,7 @@ include(ExternalProject)
 include(CheckIncludeFileCXX)
 
 include_directories(
+    .
     srcs/ga
     srcs/gsp
     srcs/exceptions

@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/CanonicalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-20 13:21:03
-// Modified: 2017-03-13 17:04:14
+// Modified: 2017-03-14 17:21:09
 
 #ifndef GSPCANONICALGA_HPP_
 #define GSPCANONICALGA_HPP_
@@ -20,26 +20,28 @@ template <typename NodeIdType = std::string>
 class CanonicalGA : public ga::CanonicalGA<ga::FixedBinaryString>
 {
     public:
-        using EdgeContainer = typename gsp::Graph<NodeIdType>::EdgeContainer;
         using CandidateSolution = ga::FixedBinaryString;
         using TGA = ga::CanonicalGA<CandidateSolution>;
 
     public:
-        CanonicalGA(EdgeContainer const& graph,
+        CanonicalGA(gsp::Graph<NodeIdType> const& graph,
+                    unsigned int nb_cycles,
                     unsigned int p_size,
                     typename TGA::ReproductionOperator const& rep_op,
                     unsigned int p_rep,
                     typename TGA::MutationOperator const& mut_op,
                     unsigned int p_mut)
-            : TGA(p_size, rep_op, p_rep, mut_op, p_mut), _initial_graph(graph)
+            : TGA(p_size, rep_op, p_rep, mut_op, p_mut),
+              _initial_graph(graph), _nb_cycles(nb_cycles), _current_cycle(0)
         {
         }
 
-        CanonicalGA(EdgeContainer const& graph,
+        CanonicalGA(gsp::Graph<NodeIdType> const& graph,
+                    unsigned int nb_cycles,
                     unsigned int p_size, unsigned int p_rep, unsigned int p_mut)
             : TGA(p_size, &CandidateSolution::crossover_twopoint, p_rep,
                   &CandidateSolution::flip_random, p_mut),
-              _initial_graph(graph)
+              _initial_graph(graph), _nb_cycles(nb_cycles), _current_cycle(0)
 
         {
         }
@@ -53,21 +55,43 @@ class CanonicalGA : public ga::CanonicalGA<ga::FixedBinaryString>
 
     public:
         virtual unsigned int
-        compute_fitness(CandidateSolution const&) const
+        compute_fitness(CandidateSolution const& c) const
         {
-            return 0; // TODO
+            unsigned int idx = 0;
+            unsigned int total_cost = 0;
+
+            for (auto it = _initial_graph.edges_begin();
+                 it != _initial_graph.edges_begin();
+                 ++it) {
+
+                if (c[idx])
+                    total_cost += it->second;
+                ++idx;
+            }
+            if (_initial_graph.get_total_cost() < total_cost)
+                throw std::runtime_error("Initial graph cost is smaller than "
+                                         "candidate cost");
+            return _initial_graph.get_total_cost() - total_cost;
         }
 
         virtual bool
         should_run() const
         {
-            return true; // TODO
+            return _current_cycle < _nb_cycles;
+        }
+
+        virtual void
+        hook_cycle_end()
+        {
+            ++_current_cycle;
         }
 
         // TODO feasibility check for terminal node requirements!!!
 
     protected:
-        EdgeContainer   _initial_graph;
+        gsp::Graph<NodeIdType>  _initial_graph;
+        unsigned int            _nb_cycles;
+        unsigned int            _current_cycle;
 };
 
 }

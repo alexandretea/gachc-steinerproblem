@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/GSPSolver.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-24 12:33:08
-// Modified: 2017-03-13 17:05:49
+// Modified: 2017-03-14 17:28:42
 
 #ifndef GSPSOLVER_H
 #define GSPSOLVER_H
@@ -27,6 +27,7 @@ class Solver
     public:
         using NodeID = std::string;
         using EdgeContainer = typename gsp::Graph<NodeID>::EdgeContainer;
+        using CandidateSolution = ga::FixedBinaryString;
 
     public:
         // TODO probabilities to floats ?
@@ -48,19 +49,23 @@ class Solver
         Graph<NodeID>
         solve()
         {
-            Graph<NodeID>   result;
+            Graph<NodeID>       result;
+            CandidateSolution   solution;
 
+            // TODO display config
             init_algorithm();
-            (*_algorithm)();
+            solution = (*_algorithm)();
+            std::cout << "Solution: " << solution.to_string() << std::endl;
             return result;
         }
 
     protected:
-        void
+        virtual void
         init_algorithm()
         {
             _algorithm = std::make_unique<T_GA<NodeID>>(
-                    _initial_graph.get_edges(),
+                    _initial_graph,
+                    1000, // TODO
                     _pop_size, _prob_rep, _prob_mut
                 );
         }

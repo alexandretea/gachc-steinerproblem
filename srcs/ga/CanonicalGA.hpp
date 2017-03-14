@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/CanonicalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-10 05:40:08
-// Modified: 2017-03-01 02:05:37
+// Modified: 2017-03-14 17:26:44
 
 #ifndef CANONICALGA_H
 #define CANONICALGA_H
@@ -65,11 +65,12 @@ class CanonicalGA
         CanonicalGA&    operator=(CanonicalGA const& other) = delete;
 
     public:
-        Candidate
+        IndividualType
         operator()()
         {
             generateRandomPopulation();
             while (should_run()) {
+                hook_cycle_begin();
                 std::vector<Candidate const*> selected_candidates;
                 std::vector<Candidate> new_generation;
 
@@ -81,6 +82,7 @@ class CanonicalGA
                 selection_process(selected_candidates);
                 create_new_generation(new_generation, selected_candidates);
                 _population = new_generation; // TODO useless step through newg?
+                hook_cycle_end();
             }
 
             auto it =
@@ -89,7 +91,7 @@ class CanonicalGA
                                  { return a.fitness < b.fitness; });
             if (it == _population.end())
                 throw std::runtime_error("Population is empty");
-            return *it;
+            return it->individual;
         }
 
     protected:
@@ -175,6 +177,10 @@ class CanonicalGA
                 _population.push_back({ IndividualType::generate_random(), 0 });
             }
         }
+
+        // hook functions to overload if necessary
+        virtual void    hook_cycle_begin()  {}
+        virtual void    hook_cycle_end()    {}
 
         // functions to implement when inherited
         virtual unsigned int compute_fitness(IndividualType const&) const = 0;

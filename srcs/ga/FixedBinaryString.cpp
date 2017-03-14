@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/FixedBinaryString.cpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-02-13 14:11:43
-// Modified: 2017-02-21 23:40:28
+// Modified: 2017-03-14 17:29:57
 
 #include "FixedBinaryString.hpp"
 
@@ -50,6 +50,12 @@ FixedBinaryString::flip(unsigned int index)
 
 bool
 FixedBinaryString::test(unsigned int index) const
+{
+    return _rep.at(index);
+}
+
+bool
+FixedBinaryString::operator[](unsigned int index) const
 {
     return _rep.at(index);
 }
@@ -130,13 +136,37 @@ FixedBinaryString::generate_random()
 }
 
 std::string
-FixedBinaryString::to_string() const
+FixedBinaryString::to_string() const // TODO use std::to_string()
 {
     std::string res;
 
     for (bool bit: _rep)
         res += (bit ? "1" : "0");
     return res;
+}
+
+FixedBinaryString::DynamicBitset::const_iterator
+FixedBinaryString::begin() const
+{
+    return _rep.begin();
+}
+
+FixedBinaryString::DynamicBitset::const_iterator
+FixedBinaryString::end() const
+{
+    return _rep.end();
+}
+
+FixedBinaryString::DynamicBitset::iterator
+FixedBinaryString::begin()
+{
+    return _rep.begin();
+}
+
+FixedBinaryString::DynamicBitset::iterator
+FixedBinaryString::end()
+{
+    return _rep.end();
 }
 
 }

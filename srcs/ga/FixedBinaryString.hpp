@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/FixedBinaryString.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-15 20:57:05
-// Modified: 2017-02-21 23:37:10
+// Modified: 2017-03-14 16:21:01
 
 #ifndef FIXEDBINARYSTRING_H
 #define FIXEDBINARYSTRING_H
@@ -37,7 +37,7 @@ class FixedBinaryString : public utils::IStringRepresentation
     public:
         void        flip(unsigned int index);
         bool        test(unsigned int index) const;
-        bool&       operator[](unsigned int index);
+        bool        operator[](unsigned int index) const;
         size_t      size() const;
 
         // Reproduction operators
@@ -47,6 +47,12 @@ class FixedBinaryString : public utils::IStringRepresentation
         // Mutation operators
         void        flip_all();
         void        flip_random();
+
+        // Iterators
+        DynamicBitset::const_iterator   begin() const;
+        DynamicBitset::const_iterator   end() const;
+        DynamicBitset::iterator         begin();
+        DynamicBitset::iterator         end();
 
     public:
         virtual std::string         to_string() const;
