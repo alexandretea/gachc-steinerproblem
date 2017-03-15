@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/Edge.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-03-05 14:53:28
-// Modified: 2017-03-15 12:41:39
+// Modified: 2017-03-15 16:16:32
 
 #ifndef GSPGRAPH_HPP_
 #define GSPGRAPH_HPP_
@@ -21,7 +21,7 @@
 namespace gsp {
 
 template <typename IDType>
-class Graph
+class Graph // Undirected Graph
 {
     /*
     ** Data structures
@@ -69,7 +69,7 @@ class Graph
                 void
                 add_neighbour(Node const& n, unsigned int cost)
                 {
-                    _neighbours.emplace(n, cost);
+                    _neighbours.emplace(&n, cost);
                 } // TODO removal function
 
                 IDType const&   get_id() const      { return _id; }
@@ -91,10 +91,10 @@ class Graph
                 IDType  _id;
                 Type    _type;
 
-                std::map<Node, unsigned int>    _neighbours;
+                std::map<Node const*, unsigned int>    _neighbours;
         };
 
-        using NodePair = std::pair<Node, Node>;
+        using NodePair = std::pair<Node*, Node*>;
 
         struct NodePairHasher
         {
@@ -103,8 +103,8 @@ class Graph
             {
                 std::hash<std::string> hasher;
 
-                return hasher(id_to_string(path.first.get_id())
-                              + id_to_string(path.second.get_id()));
+                return hasher(id_to_string(path.first->get_id())
+                              + id_to_string(path.second->get_id()));
             }
         };
 
@@ -120,7 +120,7 @@ class Graph
     ** Constructors/Destructor
     */
     public:
-        Graph()
+        Graph() : _nodes(), _edges(), _pathreqs(), _total_cost(0)
         {
         }
 
@@ -130,7 +130,7 @@ class Graph
 
         Graph(Graph<IDType> const& other)
             : _nodes(other._nodes), _edges(other._edges),
-              _pathreqs(other._pathreqs)
+              _pathreqs(other._pathreqs), _total_cost(other._total_cost)
         {
         }
 
@@ -138,9 +138,10 @@ class Graph
         operator=(Graph<IDType>const& other)
         {
             if (&other != this) {
-                _nodes(other._nodes);
-                _edges(other.edges);
-                _pathreqs(other._pathreqs);
+                _nodes = other._nodes;
+                _edges = other.edges;
+                _pathreqs = other._pathreqs;
+                _total_cost = other._total_cost;
             }
             return *this;
         }
@@ -190,8 +191,8 @@ class Graph
         {
             Node&       src = _nodes.at(src_id);
             Node&       dest = _nodes.at(dest_id);
-            NodePair    p = std::make_pair(src, dest);
-            NodePair    reverse = std::make_pair(dest, src);
+            NodePair    p = std::make_pair(&src, &dest);
+            NodePair    reverse = std::make_pair(&dest, &src);
             auto        it = _edges.find(reverse);
 
             if (it != _edges.end()) {
@@ -199,6 +200,8 @@ class Graph
             } else {
                 _edges[p] = cost;
             }
+            src.add_neighbour(dest, cost);
+            src.add_neighbour(src, cost);
             _total_cost += cost;
         }
 
@@ -208,8 +211,8 @@ class Graph
         {
             Node&       node_a = _nodes.at(id_a);
             Node&       node_b = _nodes.at(id_b);
-            NodePair    p = std::make_pair(node_a, node_b);
-            NodePair    reverse = std::make_pair(node_b, node_a);
+            NodePair    p = std::make_pair(&node_a, &node_b);
+            NodePair    reverse = std::make_pair(&node_b, &node_a);
             // TODO hash fn that gives same hash
             auto        it = _pathreqs.find(reverse);
 

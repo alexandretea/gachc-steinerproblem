@@ -27,13 +27,10 @@ file(GLOB sources
 )
 set(SOURCES ${sources})
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+
 add_executable(${PROJECT_NAME} ${SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES
                       COMPILE_FLAGS "${CMAKE_CXX_FLAGS} \
--g0 -O3 -D PRODUCTION -O3 -std=c++14 -W -Wall -Wextra")
+-D PRODUCTION -std=c++14 -W -Wall -Wextra")
 target_link_libraries(${PROJECT_NAME} ${LIBS})
-
-add_executable(${PROJECT_NAME}_debug ${SOURCES})
-set_target_properties(${PROJECT_NAME}_debug PROPERTIES COMPILE_FLAGS
-"${CMAKE_CXX_FLAGS} -O0 -g3 -D DEBUG -std=c++14 -W -Wall -Wextra")
-target_link_libraries(${PROJECT_NAME}_debug ${LIBS})
