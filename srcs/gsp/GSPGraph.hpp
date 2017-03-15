@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/Edge.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-03-05 14:53:28
-// Modified: 2017-03-14 18:08:17
+// Modified: 2017-03-15 12:41:39
 
 #ifndef GSPGRAPH_HPP_
 #define GSPGRAPH_HPP_
@@ -27,19 +27,71 @@ class Graph
     ** Data structures
     */
     public:
-        struct Node
+        class Node
         {
-            enum Type
-            {
-                TERMINAL,   // final destinations
-                STEINER     // intermediate nodes
-            };
+            public:
+                enum Type
+                {
+                    TERMINAL,   // final destinations
+                    STEINER     // intermediate nodes
+                };
 
-            IDType  id;
-            Type    type;
+            public:
+                Node() {}
+                Node(Type type, IDType const& id)
+                    : _id(id), _type(type), _neighbours() {}
+                ~Node() {}
+                Node(Node const& o)
+                    : _id(o._id), _type(o._type), _neighbours(o._neighbours) {}
 
-            bool    operator==(Node const& rhs) const { return id == rhs.id; }
-            bool    operator<(Node const& rhs) const { return id < rhs.id;  }
+                Node&
+                operator=(Node const& o)
+                {
+                    if (&o != this) {
+                        _id = o._id;
+                        _type = o._type;
+                        _neighbours = o._neighbours;
+                    }
+                }
+
+                bool
+                operator==(Node const& rhs) const
+                {
+                    return _id == rhs._id;
+                }
+
+                bool
+                operator<(Node const& rhs) const
+                {
+                    return _id < rhs._id;
+                }
+
+                void
+                add_neighbour(Node const& n, unsigned int cost)
+                {
+                    _neighbours.emplace(n, cost);
+                } // TODO removal function
+
+                IDType const&   get_id() const      { return _id; }
+                Type            get_type() const    { return _type; }
+
+                typename std::map<Node, unsigned int>::const_iterator
+                begin() const
+                {
+                    return _neighbours.begin();
+                }
+
+                typename std::map<Node, unsigned int>::const_iterator
+                end() const
+                {
+                    return _neighbours.end();
+                }
+
+            protected:
+                IDType  _id;
+                Type    _type;
+
+                std::map<Node, unsigned int>    _neighbours;
         };
 
         using NodePair = std::pair<Node, Node>;
@@ -51,11 +103,13 @@ class Graph
             {
                 std::hash<std::string> hasher;
 
-                return hasher(id_to_string(path.first.id)
-                              + id_to_string(path.second.id));
+                return hasher(id_to_string(path.first.get_id())
+                              + id_to_string(path.second.get_id()));
             }
         };
 
+        // TODO rename with more explicit name
+        using NodeContainer = std::unordered_map<IDType, Node>;
         using EdgeContainer = std::map<NodePair, unsigned int>;
         // Needs to be ordered as it will be represented as FixedBinaryString
         using PathReqs =
@@ -123,19 +177,19 @@ class Graph
             load_from_json(jsonstream);
         }
 
-        Node const*
+        Node const&
         add_node(typename Node::Type type, IDType const& id)
         {
             // TODO check duplicate? unordered_map?
-            _nodes.push_back({ id, type });
-            return &_nodes.back();
+            auto ret = _nodes.emplace(id, Node(type, id));
+            return ret.first->second;
         }
 
         void
         add_edge(IDType const& src_id, IDType const& dest_id, unsigned int cost)
         {
-            Node&       src = get_node(src_id);
-            Node&       dest = get_node(dest_id);
+            Node&       src = _nodes.at(src_id);
+            Node&       dest = _nodes.at(dest_id);
             NodePair    p = std::make_pair(src, dest);
             NodePair    reverse = std::make_pair(dest, src);
             auto        it = _edges.find(reverse);
@@ -152,10 +206,11 @@ class Graph
         add_path_requirement(IDType const& id_a, IDType const& id_b,
                              unsigned int min_paths)
         {
-            Node&       node_a = get_node(id_a);
-            Node&       node_b = get_node(id_b);
+            Node&       node_a = _nodes.at(id_a);
+            Node&       node_b = _nodes.at(id_b);
             NodePair    p = std::make_pair(node_a, node_b);
             NodePair    reverse = std::make_pair(node_b, node_a);
+            // TODO hash fn that gives same hash
             auto        it = _pathreqs.find(reverse);
 
             if (it != _pathreqs.end()) {
@@ -170,14 +225,14 @@ class Graph
         Node const&
         get_node(IDType const& id) const
         {
-            return get_node(id);
+            return _nodes.at(id);
         }
 
         unsigned int
         get_pathreq(IDType const& id_a, IDType const& id_b) const
         {
-            Node&   node_a = get_node(id_a);
-            Node&   node_b = get_node(id_b);
+            Node&   node_a = _nodes.at(id_a);
+            Node&   node_b = _nodes.at(id_b);
             NodePair    p = std::make_pair(node_a, node_b);
             auto    it = _pathreqs.find(p);
 
@@ -250,28 +305,11 @@ class Graph
             return std::to_string(id);
         }
 
-    /*
-    ** Protected member functions
-    */
     protected:
-        Node&
-        get_node(IDType const& id)
-        {
-            auto node = std::find_if(_nodes.begin(), _nodes.end(),
-                                     [&id](Node const& node)
-                                     { return node.id == id; });
-
-            if (node == _nodes.end())
-                throw std::runtime_error("Node " + id_to_string(id)
-                                         + " was not found");
-            return *node;
-        }
-
-    protected:
-        std::vector<Node>       _nodes;
-        EdgeContainer           _edges;
-        PathReqs                _pathreqs;
-        unsigned int            _total_cost;
+        NodeContainer   _nodes;
+        EdgeContainer   _edges;
+        PathReqs        _pathreqs;
+        unsigned int    _total_cost;
 };
 
 template <>
