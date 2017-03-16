@@ -4,11 +4,12 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/Edge.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-03-05 14:53:28
-// Modified: 2017-03-15 16:16:32
+// Modified: 2017-03-16 14:46:47
 
 #ifndef GSPGRAPH_HPP_
 #define GSPGRAPH_HPP_
 
+#include <queue>
 #include <functional>
 #include <vector>
 #include <stdexcept>
@@ -17,6 +18,7 @@
 #include <unordered_map>
 #include <fstream>
 #include "vendors/json.hpp"
+#include "utils/container.hpp"
 
 namespace gsp {
 
@@ -61,6 +63,12 @@ class Graph // Undirected Graph
                 }
 
                 bool
+                operator!=(Node const& rhs) const
+                {
+                    return !operator==(rhs);
+                }
+
+                bool
                 operator<(Node const& rhs) const
                 {
                     return _id < rhs._id;
@@ -75,13 +83,13 @@ class Graph // Undirected Graph
                 IDType const&   get_id() const      { return _id; }
                 Type            get_type() const    { return _type; }
 
-                typename std::map<Node, unsigned int>::const_iterator
+                typename std::map<Node const*, unsigned int>::const_iterator
                 begin() const
                 {
                     return _neighbours.begin();
                 }
 
-                typename std::map<Node, unsigned int>::const_iterator
+                typename std::map<Node const*, unsigned int>::const_iterator
                 end() const
                 {
                     return _neighbours.end();
@@ -94,7 +102,7 @@ class Graph // Undirected Graph
                 std::map<Node const*, unsigned int>    _neighbours;
         };
 
-        using NodePair = std::pair<Node*, Node*>;
+        using NodePair = std::pair<Node const*, Node const*>;
 
         struct NodePairHasher
         {
@@ -115,6 +123,10 @@ class Graph // Undirected Graph
         using PathReqs =
             std::unordered_map<NodePair, unsigned int, NodePairHasher>;
         // TODO see usage and check if std::map would be better
+        using NodePath = std::vector<Node const*>;
+        using NodeList = std::list<Node const*>;
+        using VisitedNodes = std::unordered_map<Node const*, NodeList>;
+        //                                      visited node|list of parents
 
     /*
     ** Constructors/Destructor
@@ -201,7 +213,7 @@ class Graph // Undirected Graph
                 _edges[p] = cost;
             }
             src.add_neighbour(dest, cost);
-            src.add_neighbour(src, cost);
+            dest.add_neighbour(src, cost);
             _total_cost += cost;
         }
 
@@ -224,6 +236,61 @@ class Graph // Undirected Graph
         }
 
         // TODO removal functions
+
+        // BFS search
+        // will find all paths if max_nb paths is 0
+        // topology is used to find paths within a reduced-cost graph
+        // TODO when find dest, check max_nb_path and stop?
+        std::vector<NodePath>
+        find_all_paths(Node const& src, Node const& dest,
+                   unsigned int max_nb_paths = 0,
+                   ga::FixedBinaryString const* topology = nullptr) const
+        {
+            VisitedNodes                visited;
+            std::queue<NodePair>        to_visit;
+
+            if (topology != nullptr and _edges.size() != topology->size())
+                throw std::runtime_error("Binary string has a different size "
+                                         "from edges container ");
+            to_visit.emplace(&src, nullptr);
+            while (not to_visit.empty()) {
+                NodePair current = to_visit.front();
+
+                to_visit.pop();
+                std::cout << "| pop " << current.first->get_id() << std::endl; // TODO debug
+
+                if (is_visited_node(visited, current))
+                    continue ; // TODO check if actually happen
+                for (auto& pair: *current.first) {
+                    Node const* neighbour = pair.first;
+
+                    if (topology == nullptr
+                        or is_edge_enabled(*current.first, *neighbour, topology)) {
+
+                        if (*neighbour == dest) { // dest found
+                            tag_node_visited(visited, &dest, current.first);
+                        } else if (is_visited_node(visited,
+                                                   neighbour, current.first)) {
+                            to_visit.emplace(neighbour, current.first);
+                            std::cout << "push " << neighbour->get_id() << std::endl; // TODO debug
+                        }
+                    }
+                }
+                tag_node_visited(visited, current);
+                std::cout << "visited " << current.first->get_id() << std::endl; // TODO debug
+            }
+            std::cout << "wut " << to_visit.size() << std::endl; // TODO why is 0
+            return bfs_build_paths(src, dest, visited);
+        }
+
+        std::vector<NodePath>
+        find_paths(IDType const& src_id, IDType const& dest_id,
+                   unsigned int max_nb_paths = 0,
+                   ga::FixedBinaryString const* topology = nullptr) const
+        {
+            return find_paths(_nodes.at(src_id), _nodes.at(dest_id),
+                              max_nb_paths, topology);
+        }
 
         Node const&
         get_node(IDType const& id) const
@@ -306,6 +373,72 @@ class Graph // Undirected Graph
         id_to_string(IDType const& id) // TODO only use to_string?
         {
             return std::to_string(id);
+        }
+
+    protected:
+        bool
+        is_edge_enabled(Node const& src, Node const& dest,
+                        ga::FixedBinaryString const* topology) const
+        {
+            auto    it = _edges.find(std::make_pair(&src, &dest));
+            size_t  idx = utils::get_index(_edges, it);
+
+            return (*topology)[idx];
+        }
+
+        bool
+        is_visited_node(VisitedNodes const& visited, NodePair const& node) const
+        {
+            return is_visited_node(visited, node.first, node.second);
+        }
+
+        bool
+        is_visited_node(VisitedNodes const& visited,
+                        Node const* current, Node const* parent) const
+        {
+            auto it = visited.find(current);
+
+            if (it == visited.end())
+                return false;
+            return (std::find(it->second.begin(), it->second.end(),
+                              parent) != it->second.end());
+        }
+
+        void
+        tag_node_visited(VisitedNodes& visited, NodePair const& current) const
+        {
+                tag_node_visited(visited, current.first, current.second);
+        }
+
+        void
+        tag_node_visited(VisitedNodes& visited,
+                         Node const* current, Node const* parent) const
+        {
+                auto it = visited.find(current);
+
+                if (it == visited.end()) {
+                    visited[current] = NodeList(1, parent);
+                } else {
+                    it->second.push_back(parent);
+                }
+        }
+
+        // TODO tree instead? VisitedNodes data structure is ugly af
+        NodePath
+        bfs_build_paths(Node const& src, Node const& dest,
+                        VisitedNodes const& visited) const
+        {
+            NodePath        path;
+            //NodePair        current(beginning);
+
+            //path.emplace_back(&dest);
+            //while (*current.first != src) {
+                //path.emplace_back(current.first);
+                //current = *visited.find(current.second);
+            //}
+            //path.emplace_back(&src);
+            //std::reverse(path.begin(), path.end());
+            return path;
         }
 
     protected:

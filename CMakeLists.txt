@@ -9,10 +9,10 @@ include(CheckIncludeFileCXX)
 
 include_directories(
     .
+    srcs/
     srcs/ga
     srcs/gsp
     srcs/exceptions
-    srcs/utils
 )
 
 set(LIBS

@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/CanonicalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-10 05:40:08
-// Modified: 2017-03-14 18:34:31
+// Modified: 2017-03-15 17:31:02
 
 #ifndef CANONICALGA_H
 #define CANONICALGA_H
@@ -14,7 +14,7 @@
 #include <vector>
 #include <utility>
 #include <stdexcept>
-#include "random.hpp"
+#include "utils/random.hpp"
 
 namespace ga {
 
@@ -70,10 +70,10 @@ class CanonicalGA
         {
             generateRandomPopulation();
             while (should_run()) {
-                hook_cycle_begin();
                 std::vector<Candidate const*> selected_candidates;
                 std::vector<Candidate> new_generation;
 
+                hook_cycle_begin();
                 // compute fitness of individuals
                 for (Candidate& c: _population) {
                     c.fitness = compute_fitness(c.individual);

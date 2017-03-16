@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/FixedBinaryString.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-15 20:57:05
-// Modified: 2017-03-14 18:14:48
+// Modified: 2017-03-15 17:31:42
 
 #ifndef FIXEDBINARYSTRING_H
 #define FIXEDBINARYSTRING_H
@@ -12,8 +12,8 @@
 #include <cstddef>
 #include <vector>
 #include <utility>
-#include "random.hpp"
-#include "IStringRepresentation.hpp"
+#include "utils/random.hpp"
+#include "utils/IStringRepresentation.hpp"
 
 namespace ga {
 
