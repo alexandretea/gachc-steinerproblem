@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/Edge.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-03-05 14:53:28
-// Modified: 2017-03-16 14:46:47
+// Modified: 2017-03-16 21:06:02
 
 #ifndef GSPGRAPH_HPP_
 #define GSPGRAPH_HPP_
@@ -13,6 +13,7 @@
 #include <functional>
 #include <vector>
 #include <stdexcept>
+#include <set>
 #include <utility>
 #include <map>
 #include <unordered_map>
@@ -123,9 +124,9 @@ class Graph // Undirected Graph
         using PathReqs =
             std::unordered_map<NodePair, unsigned int, NodePairHasher>;
         // TODO see usage and check if std::map would be better
-        using NodePath = std::vector<Node const*>;
+        using NodeSet = std::set<Node const*>;
         using NodeList = std::list<Node const*>;
-        using VisitedNodes = std::unordered_map<Node const*, NodeList>;
+        using VisitedNodes = std::unordered_map<Node const*, NodeSet>;
         //                                      visited node|list of parents
 
     /*
@@ -241,12 +242,12 @@ class Graph // Undirected Graph
         // will find all paths if max_nb paths is 0
         // topology is used to find paths within a reduced-cost graph
         // TODO when find dest, check max_nb_path and stop?
-        std::vector<NodePath>
+        std::list<NodeList>
         find_all_paths(Node const& src, Node const& dest,
                    unsigned int max_nb_paths = 0,
                    ga::FixedBinaryString const* topology = nullptr) const
         {
-            VisitedNodes                visited;
+            VisitedNodes                visited; // TODO name tpye breadcrumb?
             std::queue<NodePair>        to_visit;
 
             if (topology != nullptr and _edges.size() != topology->size())
@@ -257,7 +258,6 @@ class Graph // Undirected Graph
                 NodePair current = to_visit.front();
 
                 to_visit.pop();
-                std::cout << "| pop " << current.first->get_id() << std::endl; // TODO debug
 
                 if (is_visited_node(visited, current))
                     continue ; // TODO check if actually happen
@@ -265,30 +265,28 @@ class Graph // Undirected Graph
                     Node const* neighbour = pair.first;
 
                     if (topology == nullptr
-                        or is_edge_enabled(*current.first, *neighbour, topology)) {
+                        or is_edge_enabled(*current.first,
+                                           *neighbour, topology)) {
 
                         if (*neighbour == dest) { // dest found
                             tag_node_visited(visited, &dest, current.first);
-                        } else if (is_visited_node(visited,
+                        } else if (not is_visited_node(visited,
                                                    neighbour, current.first)) {
                             to_visit.emplace(neighbour, current.first);
-                            std::cout << "push " << neighbour->get_id() << std::endl; // TODO debug
                         }
                     }
                 }
                 tag_node_visited(visited, current);
-                std::cout << "visited " << current.first->get_id() << std::endl; // TODO debug
             }
-            std::cout << "wut " << to_visit.size() << std::endl; // TODO why is 0
-            return bfs_build_paths(src, dest, visited);
+            return bfs_build_paths(src, dest, visited, max_nb_paths);
         }
 
-        std::vector<NodePath>
-        find_paths(IDType const& src_id, IDType const& dest_id,
+        std::list<NodeList>
+        find_all_paths(IDType const& src_id, IDType const& dest_id,
                    unsigned int max_nb_paths = 0,
                    ga::FixedBinaryString const* topology = nullptr) const
         {
-            return find_paths(_nodes.at(src_id), _nodes.at(dest_id),
+            return find_all_paths(_nodes.at(src_id), _nodes.at(dest_id),
                               max_nb_paths, topology);
         }
 
@@ -407,38 +405,61 @@ class Graph // Undirected Graph
         void
         tag_node_visited(VisitedNodes& visited, NodePair const& current) const
         {
-                tag_node_visited(visited, current.first, current.second);
+            tag_node_visited(visited, current.first, current.second);
         }
 
         void
         tag_node_visited(VisitedNodes& visited,
                          Node const* current, Node const* parent) const
         {
-                auto it = visited.find(current);
+            auto it = visited.find(current);
 
-                if (it == visited.end()) {
-                    visited[current] = NodeList(1, parent);
-                } else {
-                    it->second.push_back(parent);
-                }
+            if (it == visited.end()) {
+                visited[current] = NodeSet();
+                visited[current].insert(current);
+            } else {
+                it->second.insert(parent);
+            }
         }
 
         // TODO tree instead? VisitedNodes data structure is ugly af
-        NodePath
+        std::list<NodeList>
         bfs_build_paths(Node const& src, Node const& dest,
-                        VisitedNodes const& visited) const
+                        VisitedNodes const& visited,
+                        unsigned int max_nb_paths) const
         {
-            NodePath        path;
-            //NodePair        current(beginning);
+            std::list<NodeList>   paths(1);
 
-            //path.emplace_back(&dest);
-            //while (*current.first != src) {
-                //path.emplace_back(current.first);
-                //current = *visited.find(current.second);
-            //}
-            //path.emplace_back(&src);
-            //std::reverse(path.begin(), path.end());
-            return path;
+            dfs_build_paths(src, &dest, visited, paths);
+            return paths;
+        }
+
+        void
+        dfs_build_paths(Node const& src, Node const* current,
+                           VisitedNodes const& visited,
+                           std::list<NodeList>& paths,
+                           unsigned int max_nb_paths) const
+        {
+            NodeList& path = paths.back();
+
+            path.push_front(current);
+            if (*current == src) {      // path complete
+                paths.push_front(path);
+            } else {
+                NodeSet parents = visited.at(current);
+
+                for (Node const* parent: parents) {
+                    if (std::find(path.begin(),         // bottleneck
+                                  path.end(), parent) == path.end()) {
+
+                        dfs_build_paths(src, parent, visited, paths);
+                        path = paths.back();
+
+                        if (path.size() > 1)
+                            path.pop_front();
+                    }
+                }
+            }
         }
 
     protected:

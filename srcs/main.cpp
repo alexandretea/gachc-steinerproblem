@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/main.cpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-13 18:35:57
-// Modified: 2017-03-16 14:43:06
+// Modified: 2017-03-16 19:28:25
 
 #include <cstdlib>
 #include <iostream>
@@ -26,6 +26,7 @@ main(int ac, char** av)
         graph.load_from_json(av[1]);
         auto res = graph.find_all_paths("B", "E");
 
+        std::cout << "res: " << std::endl;
         for (auto a: res) {
             for (auto n: a) {
                 std::cout << n->get_id() << " -> ";
