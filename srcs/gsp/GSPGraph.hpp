@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/Edge.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-03-05 14:53:28
-// Modified: 2017-03-17 12:57:37
+// Modified: 2017-03-17 13:09:45
 
 #ifndef GSPGRAPH_HPP_
 #define GSPGRAPH_HPP_
@@ -57,23 +57,13 @@ class Graph // Undirected Graph
                     }
                 }
 
+                // comparison operators
                 bool
-                operator==(Node const& rhs) const
-                {
-                    return _id == rhs._id;
-                }
-
+                operator==(Node const& rhs) const   { return _id == rhs._id; }
                 bool
-                operator!=(Node const& rhs) const
-                {
-                    return !operator==(rhs);
-                }
-
+                operator!=(Node const& rhs) const   { return !operator==(rhs); }
                 bool
-                operator<(Node const& rhs) const
-                {
-                    return _id < rhs._id;
-                }
+                operator<(Node const& rhs) const    { return _id < rhs._id; }
 
                 void
                 add_neighbour(Node const& n, unsigned int cost)
@@ -85,16 +75,9 @@ class Graph // Undirected Graph
                 Type            get_type() const    { return _type; }
 
                 typename std::map<Node const*, unsigned int>::const_iterator
-                begin() const
-                {
-                    return _neighbours.begin();
-                }
-
+                begin() const   { return _neighbours.begin(); }
                 typename std::map<Node const*, unsigned int>::const_iterator
-                end() const
-                {
-                    return _neighbours.end();
-                }
+                end() const     { return _neighbours.end(); }
 
             protected:
                 IDType  _id;
@@ -194,6 +177,7 @@ class Graph // Undirected Graph
         {
             // TODO check duplicate? unordered_map?
             auto ret = _nodes.emplace(id, Node(type, id));
+
             return ret.first->second;
         }
 
@@ -264,19 +248,13 @@ class Graph // Undirected Graph
                               max_nb_paths, topology);
         }
 
-        Node const&
-        get_node(IDType const& id) const
-        {
-            return _nodes.at(id);
-        }
-
         unsigned int
         get_pathreq(IDType const& id_a, IDType const& id_b) const
         {
-            Node&   node_a = _nodes.at(id_a);
-            Node&   node_b = _nodes.at(id_b);
+            Node&       node_a = _nodes.at(id_a);
+            Node&       node_b = _nodes.at(id_b);
             NodePair    p = std::make_pair(node_a, node_b);
-            auto    it = _pathreqs.find(p);
+            auto        it = _pathreqs.find(p);
 
             if (it == _pathreqs.end()) {
                 p = std::make_pair(node_b, node_a);
@@ -288,17 +266,15 @@ class Graph // Undirected Graph
             return it->second;
         }
 
-        unsigned int
-        get_total_cost() const
-        {
-            return _total_cost;
-        }
+        Node const&
+        get_node(IDType const& id) const
+        { return _nodes.at(id); }
 
         unsigned int
-        get_nb_edges() const
-        {
-            return _edges.size();
-        }
+        get_total_cost() const  { return _total_cost; }
+
+        unsigned int
+        get_nb_edges() const    { return _edges.size(); }
 
         /*
         ** Iterator getters
@@ -306,46 +282,23 @@ class Graph // Undirected Graph
         ** e.g.     for (auto node: graph) { ... }
         */
         typename std::vector<Node>::const_iterator
-        begin() const
-        {
-            return _nodes.begin();
-        }
-
+        begin() const           { return _nodes.begin(); }
         typename std::vector<Node>::const_iterator
-        end() const
-        {
-            return _nodes.end();
-        }
+        end() const             { return _nodes.end(); }
 
         typename EdgeContainer::const_iterator
-        edges_begin() const
-        {
-            return _edges.begin();
-        }
-
+        edges_begin() const     { return _edges.begin(); }
         typename EdgeContainer::const_iterator
-        edges_end() const
-        {
-            return _edges.end();
-        }
+        edges_end() const       { return _edges.end(); }
 
         typename PathReqs::const_iterator
-        pathreqs_begin() const
-        {
-            return _pathreqs.begin();
-        }
-
+        pathreqs_begin() const  { return _pathreqs.begin(); }
         typename PathReqs::const_iterator
-        pathreqs_end() const
-        {
-            return _pathreqs.end();
-        }
+        pathreqs_end() const    { return _pathreqs.end(); }
 
+        // static tmp
         static std::string
-        id_to_string(IDType const& id) // TODO only use to_string?
-        {
-            return std::to_string(id);
-        }
+        id_to_string(IDType const& id) { return std::to_string(id); }
 
     protected:
         bool
