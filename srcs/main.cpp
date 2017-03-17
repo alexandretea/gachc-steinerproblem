@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/main.cpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-13 18:35:57
-// Modified: 2017-03-16 19:28:25
+// Modified: 2017-03-17 12:57:18
 
 #include <cstdlib>
 #include <iostream>
@@ -33,6 +33,7 @@ main(int ac, char** av)
             }
             std::cout << std::endl;
         }
+        std::cout << "end" << std::endl;
         //gsp::Solver<gsp::CanonicalGA> gsp_solver(graph);
 
         //gsp_solver.solve();
