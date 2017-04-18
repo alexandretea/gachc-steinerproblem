@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/CanonicalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-20 13:21:03
-// Modified: 2017-03-15 16:20:44
+// Modified: 2017-04-18 14:27:16
 
 #ifndef GSPCANONICALGA_HPP_
 #define GSPCANONICALGA_HPP_
@@ -91,6 +91,21 @@ class CanonicalGA : public ga::CanonicalGA<ga::FixedBinaryString>
                     );
         }
 
+        // TODO overload to force feasibility of candidates
+        virtual void
+        generateRandomPopulation()
+        {
+            for (unsigned int i = 0; i < _p_size; ++i) {
+                CandidateSolution individual;
+
+                do {
+                    individual = generate_random_individual();
+                } while (_initial_graph.is_valid_topology(individual));
+
+                _population.push_back({ individual, 0 });
+            }
+        }
+
         virtual void
         hook_cycle_end()
         {
@@ -98,8 +113,6 @@ class CanonicalGA : public ga::CanonicalGA<ga::FixedBinaryString>
                       << "\t" << _population.size() << std::endl;
             ++_current_cycle;
         }
-
-        // TODO feasibility check for terminal node requirements!!!
 
     protected:
         gsp::Graph<NodeIdType>  _initial_graph;

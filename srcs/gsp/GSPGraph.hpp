@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/Edge.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-03-05 14:53:28
-// Modified: 2017-03-17 13:09:45
+// Modified: 2017-04-18 14:26:59
 
 #ifndef GSPGRAPH_HPP_
 #define GSPGRAPH_HPP_
@@ -90,6 +90,7 @@ class Graph // Undirected Graph
 
         struct NodePairHasher
         {
+            // TODO get same hash if pairs are in either way (a/b = b/a)
             size_t
             operator()(NodePair const& path) const
             {
@@ -248,6 +249,21 @@ class Graph // Undirected Graph
                               max_nb_paths, topology);
         }
 
+        // check if the given topology matches all path requirements
+        bool
+        is_valid_topology(ga::FixedBinaryString const& topology) const
+        {
+            for (auto& req: _pathreqs) {
+                std::list<NodeList> paths =
+                    find_all_paths(*req.first.first, *req.first.second,
+                                   req.second, &topology);
+
+                if (paths.size() < req.second)
+                    return false;
+            }
+            return true;
+        }
+
         unsigned int
         get_pathreq(IDType const& id_a, IDType const& id_b) const
         {
@@ -309,6 +325,9 @@ class Graph // Undirected Graph
                 return true;
 
             auto    it = _edges.find(std::make_pair(&src, &dest));
+            if (it == _edges.end())
+                it = _edges.find(std::make_pair(&dest, &src));
+            // TODO improve hasher to avoid double check
             size_t  idx = utils::get_index(_edges, it);
 
             return (*topology)[idx];
@@ -334,10 +353,11 @@ class Graph // Undirected Graph
             }
             for (auto& neighbour: current) {
                 if (is_edge_enabled(current, *neighbour.first, topology)
-                    and visited.find(neighbour.first) == visited.end())
+                    and visited.find(neighbour.first) == visited.end()) {
 
                     dfs_search(src, *neighbour.first, paths, visited, topology,
                                max_nb_paths);
+                }
             }
 
         end_visit:

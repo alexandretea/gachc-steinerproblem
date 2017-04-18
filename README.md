@@ -15,3 +15,6 @@ https://pdfs.semanticscholar.org/f595/f85669d5ec20ce9639d899329e79efbe353a.pdf
 
 # bottlenecks
 - feasbility check = dfs
+
+# notes
+- feasibility: forced when generating new pop, but for mutation/reproduction...

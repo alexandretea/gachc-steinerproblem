@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/CanonicalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-10 05:40:08
-// Modified: 2017-03-15 17:31:02
+// Modified: 2017-04-18 14:32:14
 
 #ifndef CANONICALGA_H
 #define CANONICALGA_H
@@ -21,8 +21,7 @@ namespace ga {
 // CanonicalGA is a functor
 //
 // IndividualType should implement:
-//     - static void generateRandomPopulation(unsigned int p_size,
-//                                            std::vector<Candidate>& p)
+//     - virtual CandidateSolution generate_random_individual() const
 //     - virtual unsigned int compute_fitness(IndividualType const& const)
 //
 // TODO template constraint
@@ -145,6 +144,8 @@ class CanonicalGA
 
                     std::pair<IndividualType, IndividualType>   children =
                         (father.*_reproduction_op)(mother);
+
+                    // TODO is individual valid???
 
                     // reproduce and make two children
                     new_generation.push_back(

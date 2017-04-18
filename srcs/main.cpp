@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/main.cpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-13 18:35:57
-// Modified: 2017-03-17 12:57:18
+// Modified: 2017-04-18 14:17:01
 
 #include <cstdlib>
 #include <iostream>
@@ -24,21 +24,12 @@ main(int ac, char** av)
         gsp::Graph<std::string>       graph;
 
         graph.load_from_json(av[1]);
-        auto res = graph.find_all_paths("B", "E");
 
-        std::cout << "res: " << std::endl;
-        for (auto a: res) {
-            for (auto n: a) {
-                std::cout << n->get_id() << " -> ";
-            }
-            std::cout << std::endl;
-        }
-        std::cout << "end" << std::endl;
-        //gsp::Solver<gsp::CanonicalGA> gsp_solver(graph);
+        gsp::Solver<gsp::CanonicalGA> gsp_solver(graph);
 
-        //gsp_solver.solve();
+        gsp_solver.solve();
     } catch (std::exception const& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << "An error occured: " << e.what() << std::endl;
     }
     return EXIT_SUCCESS;
 }

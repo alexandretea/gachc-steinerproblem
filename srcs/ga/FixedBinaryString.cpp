@@ -4,8 +4,9 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/ga/FixedBinaryString.cpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-02-13 14:11:43
-// Modified: 2017-03-14 18:17:38
+// Modified: 2017-04-18 14:11:30
 
+#include <iostream>
 #include <bitset>
 #include "FixedBinaryString.hpp"
 
