@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/Edge.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-03-05 14:53:28
-// Modified: 2017-04-18 14:26:59
+// Modified: 2017-10-22 20:02:58
 
 #ifndef GSPGRAPH_HPP_
 #define GSPGRAPH_HPP_
@@ -96,6 +96,14 @@ class Graph // Undirected Graph
             {
                 std::hash<std::string> hasher;
 
+                if (path.first == nullptr and path.second == nullptr)
+                    throw std::runtime_error("NodePairHasher: "
+                            "Can't hash because nodes are null");
+
+                if (path.first == nullptr)
+                    return hasher(id_to_string(path.second->get_id()));
+                else if (path.second == nullptr)
+                    return hasher(id_to_string(path.first->get_id()));
                 return hasher(id_to_string(path.first->get_id())
                               + id_to_string(path.second->get_id()));
             }
@@ -103,7 +111,7 @@ class Graph // Undirected Graph
 
         // TODO rename with more explicit name
         using NodeContainer = std::unordered_map<IDType, Node>;
-        using EdgeContainer = std::map<NodePair, unsigned int>;
+        using EdgeContainer = std::map<NodePair, unsigned int>; // <nodes, cost>
         // Needs to be ordered as it will be represented as FixedBinaryString
         using PathReqs =
             std::unordered_map<NodePair, unsigned int, NodePairHasher>;
@@ -221,32 +229,61 @@ class Graph // Undirected Graph
 
         // TODO removal functions
 
-        // DFS search
+        // BFS search
         // will find all paths if max_nb paths is 0
         // topology is used to find paths within a reduced-cost graph
-        std::list<NodeList>
-        find_all_paths(Node const& src, Node const& dest,
-                   unsigned int max_nb_paths = 0,
-                   ga::FixedBinaryString const* topology = nullptr) const
+        // /!\ it will look for UNIQUE paths
+        unsigned int
+        count_paths(Node const& src, Node const& dest,
+                    unsigned int max_nb_paths = 0,
+                    ga::FixedBinaryString const* topology = nullptr) const
         {
-            std::list<NodeList>                     paths(1);
-            std::unordered_map<Node const*, bool>   visited;
+            using VisitedBook =
+                std::unordered_map<NodePair, bool, NodePairHasher>;
+
+            unsigned int            count = 0;
+            // the NodePairs used below follow this structure: <parent, node>
+            std::queue<NodePair>    to_visit;
+            VisitedBook             visited;
 
             if (topology != nullptr and _edges.size() != topology->size())
                 throw std::runtime_error("Binary string has a different size "
                                          "from edges container ");
-            dfs_search(src, dest, paths, visited, topology, max_nb_paths);
-            paths.pop_back();
-            return paths;
-        }
 
-        std::list<NodeList>
-        find_all_paths(IDType const& src_id, IDType const& dest_id,
-                   unsigned int max_nb_paths = 0,
-                   ga::FixedBinaryString const* topology = nullptr) const
-        {
-            return find_all_paths(_nodes.at(src_id), _nodes.at(dest_id),
-                              max_nb_paths, topology);
+            // start node so no parent
+            to_visit.push(std::make_pair(nullptr, &src));
+
+            while (not to_visit.empty()) {
+                NodePair    pair = to_visit.front();
+                Node const& node = *pair.second;
+
+                // remove from queue and mark as visited
+                to_visit.pop();
+                if (visited.find(pair) != visited.end())
+                    continue ;
+                visited[pair] = true;
+
+                for (auto& neighbour: node) {
+
+                    if (not is_edge_enabled(node, *neighbour.first, topology))
+                        continue ;
+
+                    NodePair    neighbour_pair =
+                        std::make_pair(&node, neighbour.first);
+
+                    // destination found
+                    if (*neighbour.first == dest) {
+                        ++count;
+                        if (max_nb_paths > 0 and count >= max_nb_paths)
+                            return count;
+                    }
+                    // neighbour hasn't been visited yet
+                    else if (visited.find(neighbour_pair) == visited.end()) {
+                        to_visit.push(neighbour_pair);
+                    }
+                }
+            }
+            return count;
         }
 
         // check if the given topology matches all path requirements
@@ -254,14 +291,27 @@ class Graph // Undirected Graph
         is_valid_topology(ga::FixedBinaryString const& topology) const
         {
             for (auto& req: _pathreqs) {
-                std::list<NodeList> paths =
-                    find_all_paths(*req.first.first, *req.first.second,
-                                   req.second, &topology);
 
-                if (paths.size() < req.second)
+                if (count_paths(*req.first.first, *req.first.second,
+                                req.second, &topology) < req.second)
                     return false;
             }
             return true;
+        }
+
+        void
+        dump_edges(ga::FixedBinaryString const& topology,
+                   std::ostream& os = std::cout) const
+        {
+            unsigned int i = 0;
+
+            for (auto& edge: _edges) {
+                if (topology[i])
+                    os  << edge.first.first->get_id() << " -> "
+                        << edge.first.second->get_id()
+                        << std::endl;
+                ++i;
+            }
         }
 
         unsigned int
@@ -328,6 +378,11 @@ class Graph // Undirected Graph
             if (it == _edges.end())
                 it = _edges.find(std::make_pair(&dest, &src));
             // TODO improve hasher to avoid double check
+
+            // get index of iterator to look for edge in topology (binary str)
+            // _edges is a map so it preserves the order, and these functions
+            // shall not be used with unassociated graph/binary string
+            // TODO force this association with type matching?
             size_t  idx = utils::get_index(_edges, it);
 
             return (*topology)[idx];

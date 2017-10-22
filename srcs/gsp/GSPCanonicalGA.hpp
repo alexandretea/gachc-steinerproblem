@@ -4,7 +4,7 @@
 // File:     /Users/alexandretea/Work/gachc-steinerproblem/srcs/gsp/CanonicalGA.hpp
 // Purpose:  TODO (a one-line explanation)
 // Created:  2017-01-20 13:21:03
-// Modified: 2017-04-18 14:27:16
+// Modified: 2017-10-22 20:04:02
 
 #ifndef GSPCANONICALGA_HPP_
 #define GSPCANONICALGA_HPP_
@@ -109,8 +109,9 @@ class CanonicalGA : public ga::CanonicalGA<ga::FixedBinaryString>
         virtual void
         hook_cycle_end()
         {
-            std::cout << "[debug] Cycle #" << _current_cycle
-                      << "\t" << _population.size() << std::endl;
+            if (_debug)
+                std::cout << "[debug] Cycle #" << _current_cycle
+                          << "\t" << _population.size() << std::endl;
             ++_current_cycle;
         }
 
